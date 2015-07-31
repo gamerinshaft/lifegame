@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ライフゲーム</title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <div class="flex row">
+    <div class="flex-auto"></div>
+    <div class="flex column">
+      <div class="flex-auto"></div>
+      <canvas id="lifegame" width="400"></canvas>
+      <div class="flex-auto"></div>
+    </div>
+    <div class="flex-auto">
+      <div id="menuButton"><i class='fa fa-step-forward'></i></div>
+    </div>
+    <aside class="rightbar open" id="rightbar">
+      <h1>僕らのライフゲーム</h1>
+      <p>日程を間違えてしまい、必修なのにテストを受け忘れてしまったので真面目に作りました。</p>
+      <ul>
+        <li>
+          <h2>セルをランダム配置する</h2>
+          <div class="content" id="remapping">
+            <i class="fa fa-repeat"></i>
+            <span class="value">0回</span>
+          </div>
+        </li>
+        <li>
+          <h2>セル情報をクリアする</h2>
+          <div class="content" id="clearing">
+            <i class="fa fa-trash"></i>
+            <span class="value">0回</span>
+          </div>
+        </li>
+        <li>
+          <h2>セルサイズを変更する</h2>
+          <div class="content" id="resizing">
+            <i class="fa fa-minus"></i>
+            <i class="fa fa-plus"></i>
+            <span class="value">20個</span>
+          </div>
+        </li>
+        <li>
+          <h2>描画間隔を変更する</h2>
+          <div class="content" id="frameRenderTiming">
+            <i class="fa fa-caret-left"></i>
+            <i class="fa fa-caret-right"></i>
+            <span class="value">1秒/1フレーム</span>
+          </div>
+        </li>
+        <li>
+          <h2>画面サイズを変更する</h2>
+          <div class="content" id="scaling">
+            <i class="fa fa-search-plus"></i>
+            <i class="fa fa-search-minus"></i>
+            <span class="value"></span>
+          </div>
+        </li>
+        <li>
+          <h2>セルカラーを変更する</h2>
+          <div class="content" id="coloring">
+            <input class="color" value="5cffd9">
+          </div>
+        </li>
+        <li>
+          <h2>再生する</h2>
+          <div class="content" id="playing">
+            <i class="fa fa-youtube-play"></i>
+            <span class="value">1秒/1フレーム</span>
+          </div>
+        </li>
+      </ul>
+    </aside>
+  </div>
+  <script>
+    document.getElementById("menuButton").addEventListener("click",function(){
+      if(document.getElementById("rightbar").classList.contains('open')){
+        this.innerHTML = "<i class='fa fa-step-backward'></i>"
+        document.getElementById("rightbar").classList.remove('open');
+      }else{
+        this.innerHTML = "<i class='fa fa-step-forward'></i>"
+        document.getElementById("rightbar").classList.add('open');
+      }
+    });
+  </script>
+  <script type="text/javascript" src="lifegame.js"></script>
+  <script type="text/javascript" src="jscolor/jscolor.js"></script>
+</body>
+</html>
