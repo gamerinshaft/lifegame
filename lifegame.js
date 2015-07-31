@@ -1,3 +1,18 @@
+// 1
+// 3
+// 6
+// 12
+// 25
+// 50
+// 100
+// 200
+// 400
+// 800
+
+// 1000/ 100 = 10 1秒間に 10回呼ばれる ということは 0.1秒だと良い
+// 1000/ 200 = 5 1秒間に 5回呼ばれる ということは 0.2秒だと良い
+
+
 window.onload = function(){
   game();
 }
@@ -8,9 +23,11 @@ function game(){
   lifegame.cvs.style.transform = "scale(0.5)"; //scaleできるようにするために必要な処理
   window.lifegame.scale = 0.5;
   window.lifegame.color;
+  window.lifegame.playStatus = false;
+  window.lifegame.throughTime = 0;
   window.lifegame.frameWidth = lifegame.cvs.width;
   window.lifegame.cellWidth = lifegame.frameWidth/lifegame.cellSize;
-  window.lifegame.frameRenderTime = 1;
+  window.lifegame.frameRenderTime = 100;
   window.lifegame.array = randomArray(0);
   if(!lifegame.cvs || !lifegame.cvs.getContext) return false;
   drawBaseFrame();
@@ -78,20 +95,48 @@ function playing(){
   var parent = document.getElementById("playing");
   parent.children[0].addEventListener("click",function(){//minus
       play();
+      watchTime();
       if (this.classList.contains("fa-youtube-play")) {
           this.classList.remove("fa-youtube-play");
           this.classList.add("fa-pause");
+          lifegame.playStatus = true;
       } else {
           this.classList.remove("fa-pause");
           this.classList.add("fa-youtube-play");
+          lifegame.playStatus = false;
       }
   });
   function play(){
       setTimeout(function () {
-          cycle();
-          play();
-      }, 1000);
+          if(lifegame.playStatus){
+            cycle();
+            play();
+          }
+      }, lifegame.frameRenderTime);
   }
+  function watchTime(){
+    setTimeout(function (){
+      if(lifegame.playStatus){
+        lifegame.throughTime = lifegame.throughTime + 0.1
+        parent.children[1].innerHTML =  lifegame.throughTime.toFixed(1) + "秒"
+        watchTime();
+      }
+    }, 100)
+  }
+}
+//================================================
+function stopPlaying(){
+  if(lifegame.playStatus){
+    var target = document.getElementById("playing").children[0];
+    target.classList.remove("fa-pause");
+    target.classList.add("fa-youtube-play");
+    lifegame.playStatus = false;
+  }
+}
+//================================================
+function resetTime(){
+  lifegame.throughTime = 0;
+  document.getElementById("playing").children[1].innerHTML = "0秒";
 }
 //================================================
 function coloring(){
@@ -107,17 +152,19 @@ function coloring(){
 function frameRenderTiming(){
   var parent = document.getElementById("frameRenderTiming");
   parent.children[0].addEventListener("click",function(){//minus
-    if(lifegame.cellSize != 1){
-      lifegame.frameRenderTime = lifegame.frameRenderTime - 1;
+    if(Math.round(1000 / lifegame.frameRenderTime) > 1){
+      lifegame.frameRenderTime = lifegame.frameRenderTime * 2;
       render();
     }
   });
   parent.children[1].addEventListener("click",function(){//minus
-    lifegame.frameRenderTime = lifegame.frameRenderTime + 1;
-    render();
+    if(Math.round(1000 / lifegame.frameRenderTime) < 160){
+      lifegame.frameRenderTime = lifegame.frameRenderTime / 2;
+      render();
+    }
   });
   function render(){
-    parent.children[2].innerHTML = lifegame.frameRenderTime + "フレーム/1秒";
+    parent.children[2].innerHTML = Math.round(1000/lifegame.frameRenderTime) + "フレーム/1秒";
   }
 }
 //================================================
@@ -128,7 +175,9 @@ function resizing(){
       lifegame.cellSize = lifegame.cellSize - 1;
       lifegame.cellWidth = lifegame.frameWidth / lifegame.cellSize;
       lifegame.array = randomArray(0);
-      drawmap(lifegame.array)
+      drawmap(lifegame.array);
+      resetTime();
+      stopPlaying();
       render();
     }
   });
@@ -189,6 +238,8 @@ function remapping(){
   parent.children[0].addEventListener("click",function(e){//remap
     lifegame.array = randomArray();
     drawmap(lifegame.array);
+    resetTime()
+    stopPlaying()
     render();
   });
   var i = 1;
@@ -203,6 +254,8 @@ function clearing() {
     parent.children[0].addEventListener("click", function (e) {//clear
         lifegame.array = randomArray(0);
         drawmap(newArray);
+        resetTime()
+        stopPlaying()
         render();
     });
     var i = 1;
