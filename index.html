@@ -72,8 +72,36 @@
             <span class="value">0秒</span>
           </div>
         </li>
+        <li>
+          <h2 id="modalButton">データセットを読み込む</h2>
+        </li>
       </ul>
     </aside>
+    <div id="modal">
+      <div class="modal-content">
+        <div class="flex column">
+          <div class="tabs">
+            <div class="tab">プリセット</div>
+            <div class="tab">投稿データ</div>
+          </div>
+          <canvas id="previewCanvas" width="300"></canvas>
+          <div class="information">
+            <span class="tag">名前</span>
+            <h1>シュッシュポッポ</h1>
+            <span class="tag">備考</span>
+            <p id="description">頑張って作ったよ</p>
+          </div>
+          <div class="flex-auto"></div>
+          <div class="menu flex row">
+            <i class="fa fa-angle-left"></i>
+            <div class="flex-auto"></div>
+            <div id="import">このデータを読み込む</div>
+            <div class="flex-auto"></div>
+            <i class="fa fa-angle-right"></i>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <script>
     document.getElementById("menuButton").addEventListener("click",function(){
@@ -84,6 +112,9 @@
         this.innerHTML = "<i class='fa fa-step-forward'></i>"
         document.getElementById("rightbar").classList.add('open');
       }
+    });
+    document.getElementById("modalButton").addEventListener("click", function(){
+      document.getElementById("modal").classList.add('show');
     });
   </script>
   <script type="text/javascript" src="lifegame.js"></script>

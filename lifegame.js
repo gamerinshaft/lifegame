@@ -1,24 +1,11 @@
-// 1
-// 3
-// 6
-// 12
-// 25
-// 50
-// 100
-// 200
-// 400
-// 800
-
-// 1000/ 100 = 10 1秒間に 10回呼ばれる ということは 0.1秒だと良い
-// 1000/ 200 = 5 1秒間に 5回呼ばれる ということは 0.2秒だと良い
-
-
 window.onload = function(){
   game();
 }
 function game(){
   window.lifegame.cellSize = 20;
   window.lifegame.cvs = document.getElementById("lifegame");
+  window.lifegame.previewCanvas = document.getElementById("previewCanvas");
+  window.lifegame.previewCanvas.array = randomArray(0);
   lifegame.cvs.width = lifegame.cvs.width * 2;
   lifegame.cvs.style.transform = "scale(0.5)"; //scaleできるようにするために必要な処理
   window.lifegame.scale = 0.5;
@@ -32,6 +19,7 @@ function game(){
   if(!lifegame.cvs || !lifegame.cvs.getContext) return false;
   drawBaseFrame();
   options();
+  preview();
 }
 
 function cycle(){
@@ -273,9 +261,6 @@ function clickable(){
   lifegame.cvs.addEventListener( "mousemove", function(e){
     hoverX = Math.floor(((e.clientX + window.pageXOffset - this.getBoundingClientRect().left) /(lifegame.cellWidth * lifegame.scale)));
     hoverY = Math.floor((e.clientY + window.pageYOffset - this.getBoundingClientRect().top) /(lifegame.cellWidth * lifegame.scale));
-    //console.log("x:"+ Math.round(e.clientX + window.pageXOffset - this.getBoundingClientRect().left) + "y:" + (e.clientY + window.pageXOffset - this.getBoundingClientRect().top));
-    //console.log("cellSize:" + lifegame.cellSize);
-    //console.log("xcell:"+ hoverX + "ycell:" + hoverY);
     lifegame.array[hoverX][hoverY] = lifegame.array[hoverX][hoverY] + 2;
     if(oldHoverX != -1){
       lifegame.array[oldHoverX][oldHoverY] = lifegame.array[oldHoverX][oldHoverY] -2;
@@ -303,35 +288,50 @@ function clickable(){
   });
 }
 //================================================
-function drawmap(array){
-  var ctx = lifegame.cvs.getContext("2d");
-  ctx.clearRect(0,0,lifegame.cvs.width,lifegame.cvs.width);
+function drawmap(array, preview){
+  if(preview != null){
+    var ctx = lifegame.previewCanvas.getContext("2d");
+    var cellSize = lifegame.previewCanvas.array.length;
+    var canvasWidth = lifegame.previewCanvas.width;
+    var cellWidth = canvasWidth / cellSize;
+  }else{
+    var ctx = lifegame.cvs.getContext("2d");
+    var cellSize = lifegame.cellSize;
+    var cellWidth = lifegame.cellWidth;
+    var canvasWidth = lifegame.cvs.width;
+  }
+  ctx.clearRect(0,0,canvasWidth,canvasWidth);
   ctx.beginPath();
   ctx.fillStyle =  lifegame.color;
-  for(var i = 0; i < lifegame.cellSize; i++){
-    for(var j = 0; j < lifegame.cellSize; j++){
+  for(var i = 0; i < cellSize; i++){
+    for(var j = 0; j < cellSize; j++){
       if(array[i][j] == 0) {
-        ctx.strokeRect(lifegame.cellWidth*i,lifegame.cellWidth*j,lifegame.cellWidth,lifegame.cellWidth);
+        ctx.strokeRect(cellWidth*i,cellWidth*j,cellWidth,cellWidth);
       }else if(array[i][j] == 1){
-        ctx.fillRect(lifegame.cellWidth*i,lifegame.cellWidth*j,lifegame.cellWidth,lifegame.cellWidth);
+        ctx.fillRect(cellWidth*i,cellWidth*j,cellWidth,cellWidth);
       }else if(array[i][j] == 2){
         ctx.fillStyle = "rgba(120,0,0,0.3)";
-        ctx.fillRect(lifegame.cellWidth*i,lifegame.cellWidth*j,lifegame.cellWidth,lifegame.cellWidth);
+        ctx.fillRect(cellWidth*i,cellWidth*j,cellWidth,cellWidth);
         ctx.fillStyle = lifegame.color;
       }else if(array[i][j] == 3){
         ctx.fillStyle = "rgba(0,120,0,0.3)";
-        ctx.fillRect(lifegame.cellWidth*i,lifegame.cellWidth*j,lifegame.cellWidth,lifegame.cellWidth);
+        ctx.fillRect(cellWidth*i,cellWidth*j,cellWidth,cellWidth);
         ctx.fillStyle = lifegame.color;
       }
     }
   }
   ctx.beginPath(); //今から線を引く
   ctx.moveTo(0,0); //視点
-  ctx.lineTo(0,lifegame.cvs.width); //移動
-  ctx.lineTo(lifegame.cvs.width,lifegame.cvs.height); //移動
-  ctx.lineTo(lifegame.cvs.height,0); //移動
+  ctx.lineTo(0,canvasWidth); //移動
+  ctx.lineTo(canvasWidth,canvasWidth); //移動
+  ctx.lineTo(canvasWidth,0); //移動
   ctx.closePath(); //視点に戻る
   ctx.stroke();
+}
+//================================================
+function preview(){
+  lifegame.previewCanvas.height = lifegame.previewCanvas.width;
+  drawmap(lifegame.previewCanvas.array ,"preview")
 }
 //================================================
 function initialize(){
@@ -358,6 +358,10 @@ function initialize(){
 function drawBaseFrame(){
   lifegame.cvs.height = lifegame.cvs.width;
   lifegame.cvs.style.height = lifegame.cvs.width + "px";
+  lifegame.cvs.style.width = lifegame.cvs.width + "px";
+  lifegame.previewCanvas.height = lifegame.previewCanvas.width;
+  lifegame.previewCanvas.style.height = lifegame.previewCanvas.width + "px";
+  lifegame.previewCanvas.style.width = lifegame.previewCanvas.width + "px";
 
   drawmap(lifegame.array);
 }
@@ -367,9 +371,6 @@ function lifeToggle(cell){ //生死を切り替える関数
 }
 
 function update(){
-}
-function clear(){//画面を真っ白に
-  clearRect();
 }
 function triggerEvent(element, event) {
   if (document.createEvent) {
