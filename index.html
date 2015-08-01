@@ -19,7 +19,7 @@
     </div>
     <aside class="rightbar open" id="rightbar">
       <h1>僕らのライフゲーム</h1>
-      <p>日程を間違えてしまい、必修なのにテストを受け忘れてしまったので真面目に作りました。</p>
+      <p>必修なのにテストを受け忘れてしまったけれど単位が欲しいです！！！！</p>
       <ul>
         <li>
           <h2>セルをランダム配置する</h2>
@@ -60,6 +60,13 @@
           </div>
         </li>
         <li>
+          <h2>表示を反転する</h2>
+          <div class="content" id="reversing">
+            <i class="fa fa-arrows-v"></i>
+            <i class="fa fa-arrows-h"></i>
+          </div>
+        </li>
+        <li>
           <h2>セルカラーを変更する</h2>
           <div class="content" id="coloring">
             <input class="color" value="5cffd9">
@@ -73,33 +80,47 @@
           </div>
         </li>
         <li>
-          <h2 id="modalButton">データセットを読み込む</h2>
+          <h2 id="modalButton" class="button">データセットを読み込む</h2>
+        </li>
+        <li>
+          <h2 id="exportButton" class="button">データを書き出す</h2>
         </li>
       </ul>
     </aside>
     <div id="modal">
-      <div class="modal-content">
+      <div class="flex row">
+        <div class="flex-auto"></div>
         <div class="flex column">
-          <div class="tabs">
-            <div class="tab">プリセット</div>
-            <div class="tab">投稿データ</div>
-          </div>
-          <canvas id="previewCanvas" width="300"></canvas>
-          <div class="information">
-            <span class="tag">名前</span>
-            <h1>シュッシュポッポ</h1>
-            <span class="tag">備考</span>
-            <p id="description">頑張って作ったよ</p>
+          <div class="flex-auto"></div>
+          <div class="modal-content">
+            <div id="closeButton" class="closeButton"><i class="fa fa-times"></i></div>
+            <div class="flex column">
+              <div class="tabs">
+                <div class="tab">プリセット</div>
+                <div class="tab">投稿データ</div>
+              </div>
+              <div class="canvas-wrap">
+                <canvas id="previewCanvas" width="300"></canvas>
+                <div class="information">
+                  <span class="tag">名前</span>
+                  <h1 id="previewName">シュッシュポッポ</h1>
+                  <span class="tag">備考</span>
+                  <p id="previewContent">頑張って作ったよ</p>
+                </div>
+              </div>
+              <div class="flex-auto"></div>
+              <div class="menu flex row">
+                <i id="menuLeft" class="fa fa-angle-left"></i>
+                <div class="flex-auto"></div>
+                <div id="import">このデータを読み込む</div>
+                <div class="flex-auto"></div>
+                <i id="menuRight" class="fa fa-angle-right"></i>
+              </div>
+            </div>
           </div>
           <div class="flex-auto"></div>
-          <div class="menu flex row">
-            <i class="fa fa-angle-left"></i>
-            <div class="flex-auto"></div>
-            <div id="import">このデータを読み込む</div>
-            <div class="flex-auto"></div>
-            <i class="fa fa-angle-right"></i>
-          </div>
         </div>
+        <div class="flex-auto"></div>
       </div>
     </div>
   </div>
@@ -112,9 +133,6 @@
         this.innerHTML = "<i class='fa fa-step-forward'></i>"
         document.getElementById("rightbar").classList.add('open');
       }
-    });
-    document.getElementById("modalButton").addEventListener("click", function(){
-      document.getElementById("modal").classList.add('show');
     });
   </script>
   <script type="text/javascript" src="lifegame.js"></script>
