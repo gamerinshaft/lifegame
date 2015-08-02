@@ -58,14 +58,6 @@ function cycle(){
 
       return point;
   }
-  function alive(){
-
-  }
-  function increase(){
-  }
-  function decrease(){
-
-  }
 }
 function options(){
   playing();
@@ -347,21 +339,66 @@ function clickable(){//ホバーしているセルの色を変更する
   var oldHoverY = -1
   var hoverX;
   var hoverY;
+  var isMouseDown = false;
+  var onTheX = -1;
+  var onTheY = -1;
   lifegame.cvs.addEventListener( "mousemove", function(e){
 
     hoverX = Math.floor(((e.clientX + window.pageXOffset - this.getBoundingClientRect().left) /(lifegame.cellWidth * lifegame.scale)));
     hoverY = Math.floor((e.clientY + window.pageYOffset - this.getBoundingClientRect().top) /(lifegame.cellWidth * lifegame.scale));
-    lifegame.array[hoverY][hoverX] = lifegame.array[hoverY][hoverX] + 2;
-    console.log(lifegame.array[hoverY][hoverX]);
-    if(oldHoverY != -1){
-      lifegame.array[oldHoverY][oldHoverX] = lifegame.array[oldHoverY][oldHoverX] -2;
+    if(isMouseDown){
+      if((hoverX >= 0 && hoverY >= 0) && (hoverX < lifegame.cellSize && hoverY < lifegame.cellSize) && (onTheX != hoverX || onTheY != hoverY)){
+        changeCell();
+        onTheX = hoverX;
+        onTheY = hoverY;
+        oldHoverY = hoverY;
+        oldHoverX = hoverX;
+      }
+    }else{
+      if((hoverX >= 0 && hoverY >= 0) && (hoverX < lifegame.cellSize && hoverY < lifegame.cellSize) && (onTheX != hoverX || onTheY != hoverY)){
+        lifegame.array[hoverY][hoverX] = lifegame.array[hoverY][hoverX] + 2;
+        if(oldHoverY != -1){
+          lifegame.array[oldHoverY][oldHoverX] = lifegame.array[oldHoverY][oldHoverX] -2;
+        }
+        drawmap(lifegame.array);
+        oldHoverY = hoverY;
+        oldHoverX = hoverX;
+      }
+    }
+  });
+  lifegame.cvs.addEventListener( "mousedown", function(e){
+    stopPlaying();
+    isMouseDown = true;
+  });
+  lifegame.cvs.addEventListener( "mouseup", function(e){
+    for(var i = 0; i < lifegame.cellSize; i++){
+      for(var j = 0; j < lifegame.cellSize; j++){
+        if(lifegame.array[i][j] >= 2){
+          lifegame.array[i][j] = lifegame.array[i][j] - 2;
+        }
+      }
+    }
+    changeCell();
+    isMouseDown = false;
+  })
+  lifegame.cvs.addEventListener( "click", function(e){
+    changeCell();
+  });
+  lifegame.cvs.addEventListener( "mouseout", function(e){
+    lifegame.array[oldHoverY][oldHoverX] = lifegame.array[oldHoverY][oldHoverX] -2;
+    for(var i = 0; i < lifegame.cellSize; i++){
+      for(var j = 0; j < lifegame.cellSize; j++){
+        if(lifegame.array[i][j] >= 2){
+          lifegame.array[i][j] = lifegame.array[i][j] - 2;
+        }
+      }
     }
     drawmap(lifegame.array);
-    oldHoverY = hoverY;
-    oldHoverX = hoverX;
+    oldHoverX = -1;
+    oldHoverY = -1;
+    isMouseDown = false;
   });
-  lifegame.cvs.addEventListener( "click", function(e){
-    console.log(lifegame.array[hoverY][hoverX])
+  function changeCell(){
     if(lifegame.array[hoverY][hoverX] < 2){
       lifegame.array[hoverY][hoverX] = lifeToggle(lifegame.array[hoverY][hoverX]);
     }else{
@@ -370,13 +407,7 @@ function clickable(){//ホバーしているセルの色を変更する
     drawmap(lifegame.array);
     oldHoverY = -1;
     oldHoverX = -1;
-  });
-  lifegame.cvs.addEventListener( "mouseout", function(e){
-    lifegame.array[oldHoverY][oldHoverX] = lifegame.array[oldHoverY][oldHoverX] -2;
-    drawmap(lifegame.array);
-    oldHoverX = -1;
-    oldHoverY = -1;
-  });
+  }
 }
 //================================================
 function drawmap(array, preview){//画面にセル情報を描画する

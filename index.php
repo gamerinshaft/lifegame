@@ -19,7 +19,6 @@
     </div>
     <aside class="rightbar open" id="rightbar">
       <h1>僕らのライフゲーム</h1>
-      <p>必修なのにテストを受け忘れてしまったけれど単位が欲しいです！！！！</p>
       <ul>
         <li>
           <h2>セルをランダム配置する</h2>
