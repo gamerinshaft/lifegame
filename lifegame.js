@@ -378,7 +378,9 @@ function clickable(){//ホバーしているセルの色を変更する
         }
       }
     }
-    changeCell();
+    if(!isMouseDown){
+      changeCell();
+    }
     isMouseDown = false;
   })
   lifegame.cvs.addEventListener( "click", function(e){
