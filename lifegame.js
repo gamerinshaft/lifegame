@@ -68,6 +68,7 @@ function cycle(){
   }
 }
 function options(){
+  playing();
   scaling();
   remapping();
   clearing();
@@ -78,7 +79,7 @@ function options(){
   presets();
   exporting();
   frameRenderTiming();
-  playing();
+  saving();
 }
 //================================================
 function playing(){ //ライフゲームを実行する
@@ -161,15 +162,8 @@ function frameRenderTiming(){//描画するフレームの量を変更する
 function exporting() {
   document.getElementById("exportButton").addEventListener("click", function(){
     if(confirm("配列情報をテキストファイルとして書き出しますか？")){
-      var exportFile = "[\n";
-      for(var i=0; i < lifegame.cellSize; i++){
-        if(i == lifegame.cellSize -1){
-          exportFile = exportFile + "[" + lifegame.array[i] + "]\n";
-        }else{
-          exportFile = exportFile + "[" + lifegame.array[i] + "],\n";
-        }
-      }
-      var exportFile = exportFile + "]";
+
+      var exportFile = parseArray(lifegame.array);
       downloadAsFile("cellMap", exportFile);
     };
   })
@@ -179,6 +173,17 @@ function exporting() {
       a.href = 'data:application/octet-stream,'+encodeURIComponent(content);
       a.click();
   };
+}
+function parseArray(originalArray){
+  var array = "";
+  for(var i=0; i < originalArray.length; i++){
+    if(i == lifegame.cellSize -1){
+      array = array + originalArray[i] + "\n";
+    }else{
+      array = array + originalArray[i] + "&";
+    }
+  }
+  return array;
 }
 //================================================
 function resizing(){//セルの量を変更する
@@ -343,9 +348,11 @@ function clickable(){//ホバーしているセルの色を変更する
   var hoverX;
   var hoverY;
   lifegame.cvs.addEventListener( "mousemove", function(e){
+
     hoverX = Math.floor(((e.clientX + window.pageXOffset - this.getBoundingClientRect().left) /(lifegame.cellWidth * lifegame.scale)));
     hoverY = Math.floor((e.clientY + window.pageYOffset - this.getBoundingClientRect().top) /(lifegame.cellWidth * lifegame.scale));
     lifegame.array[hoverY][hoverX] = lifegame.array[hoverY][hoverX] + 2;
+    console.log(lifegame.array[hoverY][hoverX]);
     if(oldHoverY != -1){
       lifegame.array[oldHoverY][oldHoverX] = lifegame.array[oldHoverY][oldHoverX] -2;
     }
@@ -422,6 +429,24 @@ function preview(){
   previewArrays = lifegame.presets;
   render(previewArrays[0]);
   var num = 0;
+  document.getElementById("postData").addEventListener("click", function(){
+    document.getElementById("presets").classList.remove("active");
+    this.classList.add("active");
+    previewArrays = lifegame.loadArrays;
+    render(previewArrays[0]);
+    document.getElementById("menuRight").style.color = "#555";
+    document.getElementById("menuLeft").style.color = "grey";
+    num = 0;
+  });
+  document.getElementById("presets").addEventListener("click", function(){
+    document.getElementById("postData").classList.remove("active");
+    this.classList.add("active");
+    previewArrays = lifegame.presets;
+    render(previewArrays[0]);
+    document.getElementById("menuLeft").style.color = "grey";
+    document.getElementById("menuRight").style.color = "#555";
+    num = 0;
+  });
   document.getElementById("menuRight").addEventListener("click",function(){
     if(num + 1 < previewArrays.length){
       num = num +1;
@@ -487,54 +512,23 @@ function triggerEvent(element, event) {
     return element.fireEvent("on"+event, evt)
   }
 }
-  // for( var i=0; i < 100; i++){
-  //   var x = Math.floor(Math.random() *400);
-  //   var y = Math.floor(Math.random() *200);
-  //   var r = Math.floor(Math.random() *200);
-  //   ctx.fillStyle = "rgb(" + rnd() + "," + rnd() + "," + rnd() + ")";
-  //   ctx.beginPath();
-  //   ctx.arc(x,y,r,0,2*Math.PI);
-  //   ctx.stroke();
-  //   ctx.fill();
-  // }
-
-  // function rnd(){
-  //   return Math.floor(Math.floor(Math.random() * 255));
-  // }
-  // document.addEventListener('mousedown', draw);
-  //mousedown click dclick mousemove mouseover mouseout mousewheel
-  // function draw(e){
-  //   alert("hello");
-  //   e.clientX; //横幅
-  //   e.clientY; //縦幅取得
-  // }
-  /*
-  ctx.strokeRect(10,10,50,50); // 四角縁
-  ctx.fillRect(60,10,50,50); // 塗りつぶし色
-  ctx.clearRect(60,40,50,50); // 色を抜く
-  ctx.strokeStyle = "red";
-  ctx.strokeStyle = "rgba(255,255,255,0.8)";
-  ctx.lineWidth = 5 //pixel太さ
-  ctx.beginPath(); //今から線を引く
-  ctx.moveTo(20,20); //視点
-  ctx.lineTo(120,20); //移動
-  ctx.lineTo(120,120); //移動
-  ctx.fill() //塗りつぶしてくれる
-  ctx.closePath(); //視点に戻る
-  ctx.stroke();
-  ctx.beginPath();//今から線を引く
-  ctx.strokeStyle = "red";
-  ctx.arc(120,100,150,10/180*Math.PI, 120/180*Math.PI); //180度から210度
-  ctx.fill()
-  ctx.stroke;
-  ctx.font = "bold 20px serif";
-  ctx.textAlign = "center";
-  ctx.fillText("Japan", 20, 20);
-  ctx.fillStyle = "yellow";
-  ctx.fillText("Japan", 20, 40, 40); //強引に入れてくれる
-  */
-// }
-
+function saving(){
+  document.getElementById("saveButton").addEventListener("click",function(e){
+    document.getElementById("saveModal").classList.add("show");
+    stopPlaying();
+  });
+  document.getElementById("closeSaveButton").addEventListener("click",function(e){
+    document.getElementById("saveModal").classList.remove("show");
+  });
+  document.getElementById("submit").addEventListener("click",function(e){
+    var form = document.getElementById("form");
+    var input = document.createElement( 'input' );
+    input.setAttribute( 'type' , 'hidden' );
+    input.setAttribute( 'name' , 'array' );    // nameは任意で
+    input.setAttribute( 'value' , parseArray(lifegame.array) );   // データを入れる
+    form.appendChild( input );
+  });
+}
 function presets(){
   window.lifegame.presets =
   [

@@ -83,6 +83,9 @@
           <h2 id="modalButton" class="button">データセットを読み込む</h2>
         </li>
         <li>
+          <h2 id="saveButton" class="button">データを保存する</h2>
+        </li>
+        <li>
           <h2 id="exportButton" class="button">データを書き出す</h2>
         </li>
       </ul>
@@ -96,8 +99,8 @@
             <div id="closeButton" class="closeButton"><i class="fa fa-times"></i></div>
             <div class="flex column">
               <div class="tabs">
-                <div class="tab">プリセット</div>
-                <div class="tab">投稿データ</div>
+                <div class="tab active" id="presets">プリセット</div>
+                <div class="tab" id="postData">投稿データ</div>
               </div>
               <div class="canvas-wrap">
                 <canvas id="previewCanvas" width="300"></canvas>
@@ -108,7 +111,6 @@
                   <p id="previewContent">頑張って作ったよ</p>
                 </div>
               </div>
-              <div class="flex-auto"></div>
               <div class="menu flex row">
                 <i id="menuLeft" class="fa fa-angle-left"></i>
                 <div class="flex-auto"></div>
@@ -124,6 +126,69 @@
       </div>
     </div>
   </div>
+  <div id="saveModal">
+      <div class="flex row">
+        <div class="flex-auto"></div>
+        <div class="flex column">
+          <div class="flex-auto"></div>
+          <div class="modal-content">
+            <div id="closeSaveButton" class="closeButton"><i class="fa fa-times"></i></div>
+            <div class="flex column">
+              <h1>現在描画されているデータを保存する</h1>
+              <form id="form" action="index.php" method="POST">
+                <input type="text" name="name" placeholder="作品名">
+                <textarea type="text" name="content" placeholder="説明"></textarea>
+                <input id="submit" type="submit" value="保存する"/>
+              </form>
+            </div>
+          </div>
+          <div class="flex-auto"></div>
+        </div>
+        <div class="flex-auto"></div>
+      </div>
+    </div>
+  <?php
+    try {
+         $dbh = new PDO('mysql:host=160.16.97.70;port=110;dbname=x6313067','x6313067','admin');
+    } catch (PDOException $e){
+         var_dump($e->getMessage());
+         exit;
+    }
+    // 処理
+    // レコードの挿入
+    if(!empty($_POST["name"]) && !empty($_POST["array"])){
+      $stmt = $dbh->prepare("insert into lifegameArrayInfo (name,content,array) values(:name, :content,:array)");
+      $stmt->execute(
+        array(
+          ":name"=>$_POST["name"],
+          ":content"=>$_POST["content"],
+          ":array"=>$_POST["array"]
+        )
+      );
+    }
+
+    $sql = "select * from lifegameArrayInfo";     // sql文
+    $stmt = $dbh->query($sql);     // ステートメント
+    $arrays = array();
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $lifegameArrayInfo) {
+      $content = $lifegameArrayInfo['content'];
+      array_push($arrays, array("name" => $lifegameArrayInfo['name'], "content" =>  $content, "array" => $lifegameArrayInfo['array']));
+    }
+    // 切断
+    $dbh = null;
+  ?>
+  <script>
+    window.lifegame.loadArrays = <?php echo json_encode($arrays, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+    for(var i=0;i<window.lifegame.loadArrays.length;i++){
+      window.lifegame.loadArrays[i].array = window.lifegame.loadArrays[i].array.split("&");
+      for(var j=0;j<window.lifegame.loadArrays[i].array.length;j++ ){
+        window.lifegame.loadArrays[i].array[j] = window.lifegame.loadArrays[i].array[j].split(",");
+        for(var k=0;k<window.lifegame.loadArrays[i].array[j].length;k++ ){
+          window.lifegame.loadArrays[i].array[j][k] = Number(window.lifegame.loadArrays[i].array[j][k])
+        }
+      }
+    }
+  </script>
   <script>
     document.getElementById("menuButton").addEventListener("click",function(){
       if(document.getElementById("rightbar").classList.contains('open')){
