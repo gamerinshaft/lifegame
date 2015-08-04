@@ -1,42 +1,49 @@
-// //================================================
-// function reversing(){//キャンバスのサイズを変更する
-//   var parent = document.getElementById("reversing");
-//   parent.children[0].addEventListener("click", function (e) {
-//     var tmpArray = randomArray(0);
-//     for(var i = 0; i < lifegame.cellSize; i++){
-//       for(var j = 0; j < lifegame.cellSize; j++){
-//         tmpArray[i][j] = lifegame.array[lifegame.cellSize-1-i][j];
-//       }
-//     }
-//     lifegame.array = tmpArray;
-//     drawmap(lifegame.array);
-//   });
-//   parent.children[1].addEventListener("click", function (e) {
-//     var tmpArray = randomArray(0);
-//     for(var i = 0; i < lifegame.cellSize; i++){
-//       for(var j = 0; j < lifegame.cellSize; j++){
-//         tmpArray[i][j] = lifegame.array[i][lifegame.cellSize-1-j];
-//       }
-//     }
-//     lifegame.array = tmpArray;
-//     drawmap(lifegame.array);
-//   });
-// }
-
 window.onload = function(){
   var lifegame = document.getElementById("lifegame");
   var previewCanvas = document.getElementById("previewCanvas");
-  game = new Lifegame(lifegame, previewCanvas, 50, "red");
+  game = new Lifegame(lifegame, previewCanvas, 50, "#5CFFD9");
   playMenu();
   scaleMenu();
   resizeMenu();
   remapMenu();
   clearMenu();
   reverseMenu();
-  frameRenderTimeMenu()
-  lifegame.addEventListener("resetTime",function(){
-    document.getElementById("playing").children[1].innerHTML = "0秒";
-  });
+  frameRenderTimeMenu();
+  colorMenu();
+  saveMenu();
+  exportMenu();
+  baseMenu();
+
+  function baseMenu(){
+    lifegame.addEventListener("resetTime",function(){
+      document.getElementById("playing").children[1].innerHTML = "0秒";
+    });
+  }
+  function exportMenu(){
+    document.getElementById("exportButton").addEventListener("click", function(){
+      game.export();
+    })
+  }
+  function saveMenu(){
+    document.getElementById("saveButton").addEventListener("click",function(e){
+      document.getElementById("saveModal").classList.add("show");
+      game.stop();
+    });
+    document.getElementById("closeSaveButton").addEventListener("click",function(e){
+      document.getElementById("saveModal").classList.remove("show");
+    });
+    document.getElementById("submit").addEventListener("click",function(e){
+      var form = document.getElementById("form");
+      game.save(form);
+    });
+  }
+  function colorMenu(){
+    var parent = document.getElementById("coloring");
+    lifegame.color = "#" + parent.children[0].getAttribute("value");
+    parent.children[0].addEventListener("change", function () {
+      game.color(this.style.backgroundColor);
+    });
+  }
   function reverseMenu(){
     var parent = document.getElementById("reversing");
     parent.children[0].addEventListener("click", function (e) {
@@ -175,7 +182,7 @@ Lifegame = function(canvas,previewCanvas,cellSize,color){
   _.cvs = canvas;
   _.previewCanvas = previewCanvas;
   if(!_.cvs || !_.cvs.getContext||!_.previewCanvas || !_.previewCanvas.getContext) return false;
-  _.color = color;
+  _.cellColor = color;
   _.scaleSize = 0.5;
   _.playStatus = false;
   _.throughTime = 0;
@@ -507,7 +514,7 @@ Lifegame.prototype = {
     }
     ctx.clearRect(0,0,canvasWidth,canvasWidth);
     ctx.beginPath();
-    ctx.fillStyle =  _.color;
+    ctx.fillStyle =  _.cellColor;
     for(var i = 0; i < cellSize; i++){
       for(var j = 0; j < cellSize; j++){
         switch(array[i][j]){
@@ -520,12 +527,12 @@ Lifegame.prototype = {
           case 2:
             ctx.fillStyle = "rgba(120,0,0,0.3)";
             ctx.fillRect(cellWidth*j,cellWidth*i,cellWidth,cellWidth);
-            ctx.fillStyle = _.color;
+            ctx.fillStyle = _.cellColor;
             break;
           case 3:
             ctx.fillStyle = "rgba(0,120,0,0.3)";
             ctx.fillRect(cellWidth*j,cellWidth*i,cellWidth,cellWidth);
-            ctx.fillStyle = _.color;
+            ctx.fillStyle = _.cellColor;
             break;
         }
       }
@@ -548,68 +555,54 @@ Lifegame.prototype = {
     var _ = this;
     lifegame.throughTime = 0;
     _.fireEvent("resetTime");
+  },
+  color: function(val){
+    var _ = this;
+    if(val !=null){
+      _.cellColor = val;
+      _.drawmap(_.array);
+    }else{
+      return _.cellColor;
+    }
+  },
+  save: function(form){
+    var _ = this;
+    var input = document.createElement( 'input' );
+    input.setAttribute( 'type' , 'hidden' );
+    input.setAttribute( 'name' , 'array' );    // nameは任意で
+    input.setAttribute( 'value' , _.parseArray(_.array) );   // データを入れる
+    form.appendChild( input );
+  },
+  parseArray: function(originalArray){
+    var _ = this;
+    var array = "";
+    for(var i=0; i < originalArray.length; i++){
+      if(i == _.cellSize -1){
+        array = array + originalArray[i] + "\n";
+      }else{
+        array = array + originalArray[i] + "&";
+      }
+    }
+    array = array.replace(/,/g,"");
+    array = array.replace(/&/g,",");
+    return array;
+  },
+  export: function(){
+    var _ =this;
+    if(confirm("配列情報をテキストファイルとして書き出しますか？")){
+      var exportFile = _.parseArray(_.array);
+      downloadAsFile("cellMap", exportFile);
+    };
+    function downloadAsFile(fileName, content) {
+      var a = document.createElement('a');
+      a.download = fileName;
+      a.href = 'data:application/octet-stream,'+encodeURIComponent(content);
+      a.click();
+    };
   }
+
 }
 
-
-// //================================================
-
-// //================================================
-// function coloring(){//セルの色を変更する
-//     var parent = document.getElementById("coloring");
-//     lifegame.color = "#" + parent.children[0].getAttribute("value");
-//     parent.children[0].addEventListener("change", function () {
-//         lifegame.color = this.style.backgroundColor;
-//         drawmap(lifegame.array);
-//     });
-
-// }
-
-
-// //================================================
-// function exporting() {
-//   document.getElementById("exportButton").addEventListener("click", function(){
-//     if(confirm("配列情報をテキストファイルとして書き出しますか？")){
-
-//       var exportFile = parseArray(lifegame.array);
-//       downloadAsFile("cellMap", exportFile);
-//     };
-//   })
-//   function downloadAsFile(fileName, content) {
-//       var a = document.createElement('a');
-//       a.download = fileName;
-//       a.href = 'data:application/octet-stream,'+encodeURIComponent(content);
-//       a.click();
-//   };
-// }
-// function parseArray(originalArray){
-//   var array = "";
-//   for(var i=0; i < originalArray.length; i++){
-//     if(i == lifegame.cellSize -1){
-//       array = array + originalArray[i] + "\n";
-//     }else{
-//       array = array + originalArray[i] + "&";
-//     }
-//   }
-//   return array;
-// }
-// //================================================
-// function randomArray(val) { //セルの配列をランダムに生成する、0を与えた場合全てのセルが死んだ状態になる
-//   newArray = new Array();
-//   for (var i = 0; i < lifegame.cellSize; i++) {
-//     newArray[i] = new Array()
-//     for (var j = 0; j < lifegame.cellSize; j++) {
-//         if (val != null) {
-//             newArray[i][j] = 0;
-//         } else {
-//             newArray[i][j] = Math.round(Math.random())
-//         }
-//     }
-//   }
-//   return newArray;
-// }
-
-// //================================================
 
 // //================================================
 // function preview(){
@@ -689,23 +682,6 @@ Lifegame.prototype = {
 //     var evt = document.createEventObject();
 //     return element.fireEvent("on"+event, evt)
 //   }
-// }
-// function saving(){
-//   document.getElementById("saveButton").addEventListener("click",function(e){
-//     document.getElementById("saveModal").classList.add("show");
-//     stopPlaying();
-//   });
-//   document.getElementById("closeSaveButton").addEventListener("click",function(e){
-//     document.getElementById("saveModal").classList.remove("show");
-//   });
-//   document.getElementById("submit").addEventListener("click",function(e){
-//     var form = document.getElementById("form");
-//     var input = document.createElement( 'input' );
-//     input.setAttribute( 'type' , 'hidden' );
-//     input.setAttribute( 'name' , 'array' );    // nameは任意で
-//     input.setAttribute( 'value' , parseArray(lifegame.array) );   // データを入れる
-//     form.appendChild( input );
-//   });
 // }
 // function presets(){
 //   window.lifegame.presets =
