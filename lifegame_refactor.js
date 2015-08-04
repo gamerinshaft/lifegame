@@ -42,10 +42,10 @@ window.onload = function(){
   function scaleMenu(){//キャンバスのサイズを変更する
     var parent = document.getElementById("scaling");
     lifegame.addEventListener("scale", function(){
-      verticalMiddling();
       render();
     });
     render();
+    verticalMiddling();
     parent.children[0].addEventListener("click", function () {//plus
         if (game.scale() < 0.9) {
           game.scale(game.scale() + 0.1);
@@ -63,13 +63,9 @@ window.onload = function(){
 
   function verticalMiddling(){ //キャンバスに縦方向に中央揃えするためのメソッド
     var positionY = game.cvs.getBoundingClientRect().top;
-    var canvasHeight = game.cvs.width * game.scale;
+    var canvasHeight = game.cvs.width * (game.scale());
     var windowHeight = window.innerHeight
-    if(windowHeight < canvasHeight){
-      game.cvs.style.top = 8 - positionY + "px";
-    }else{
-      game.cvs.style.top = ((windowHeight - canvasHeight) / 2) - positionY + "px"
-    }
+    game.cvs.style.top = (windowHeight - canvasHeight)/2 - positionY + "px"
   }
 }
 
