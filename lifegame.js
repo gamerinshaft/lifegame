@@ -49,7 +49,7 @@ function cycle(){
           for (var j = -1; j <= 1; j++) {
               if (!(i == 0 && j == 0) && (x + i >= 0 && y + j >= 0) && (x + i < lifegame.cellSize && y + j < lifegame.cellSize)) {
                   if (lifegame.array[x + i][y + j] == 1 || lifegame.array[x + i][y + j] == 3) {//hover時のことを考慮するとこの書き方
-                      var point = point + 1;
+                      point = point + 1;
                   }
 
               }
@@ -150,6 +150,7 @@ function frameRenderTiming(){//描画するフレームの量を変更する
     parent.children[2].innerHTML = Math.round(1000/lifegame.frameRenderTime) + "フレーム/1秒";
   }
 }
+
 //================================================
 function exporting() {
   document.getElementById("exportButton").addEventListener("click", function(){

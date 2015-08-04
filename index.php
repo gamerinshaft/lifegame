@@ -170,8 +170,7 @@
     $stmt = $dbh->query($sql);     // ステートメント
     $arrays = array();
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $lifegameArrayInfo) {
-      $content = $lifegameArrayInfo['content'];
-      array_push($arrays, array("name" => $lifegameArrayInfo['name'], "content" =>  $content, "array" => $lifegameArrayInfo['array']));
+      array_push($arrays, array("name" => $lifegameArrayInfo['name'], "content" =>  $lifegameArrayInfo['content'], "array" => $lifegameArrayInfo['array']));
     }
     // 切断
     $dbh = null;
@@ -187,6 +186,7 @@
         }
       }
     }
+
   </script>
   <script>
     document.getElementById("menuButton").addEventListener("click",function(){
@@ -199,7 +199,7 @@
       }
     });
   </script>
-  <script type="text/javascript" src="lifegame.js"></script>
+  <script type="text/javascript" src="lifegame_refactor.js"></script>
   <script type="text/javascript" src="jscolor/jscolor.js"></script>
 </body>
 </html>
