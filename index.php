@@ -39,7 +39,7 @@
           <div class="content" id="resizing">
             <i class="fa fa-minus"></i>
             <i class="fa fa-plus"></i>
-            <span class="value">20個</span>
+            <span class="value">50個</span>
           </div>
         </li>
         <li>

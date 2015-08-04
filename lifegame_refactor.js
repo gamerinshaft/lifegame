@@ -1,14 +1,84 @@
+// //================================================
+// function reversing(){//キャンバスのサイズを変更する
+//   var parent = document.getElementById("reversing");
+//   parent.children[0].addEventListener("click", function (e) {
+//     var tmpArray = randomArray(0);
+//     for(var i = 0; i < lifegame.cellSize; i++){
+//       for(var j = 0; j < lifegame.cellSize; j++){
+//         tmpArray[i][j] = lifegame.array[lifegame.cellSize-1-i][j];
+//       }
+//     }
+//     lifegame.array = tmpArray;
+//     drawmap(lifegame.array);
+//   });
+//   parent.children[1].addEventListener("click", function (e) {
+//     var tmpArray = randomArray(0);
+//     for(var i = 0; i < lifegame.cellSize; i++){
+//       for(var j = 0; j < lifegame.cellSize; j++){
+//         tmpArray[i][j] = lifegame.array[i][lifegame.cellSize-1-j];
+//       }
+//     }
+//     lifegame.array = tmpArray;
+//     drawmap(lifegame.array);
+//   });
+// }
+
 window.onload = function(){
   var lifegame = document.getElementById("lifegame");
   var previewCanvas = document.getElementById("previewCanvas");
-  game = new Lifegame(lifegame, previewCanvas, 20, "red");
+  game = new Lifegame(lifegame, previewCanvas, 50, "red");
   playMenu();
   scaleMenu();
   resizeMenu();
   remapMenu();
+  clearMenu();
+  reverseMenu();
+  frameRenderTimeMenu()
   lifegame.addEventListener("resetTime",function(){
     document.getElementById("playing").children[1].innerHTML = "0秒";
   });
+  function reverseMenu(){
+    var parent = document.getElementById("reversing");
+    parent.children[0].addEventListener("click", function (e) {
+      game.reverse("vertical");
+    });
+    parent.children[1].addEventListener("click", function (e) {
+      game.reverse("horizon");
+    });
+  }
+  function frameRenderTimeMenu(){
+    var parent = document.getElementById("frameRenderTiming");
+    lifegame.addEventListener("renderTime",function(){
+      render();
+    });
+    parent.children[0].addEventListener("click",function(){
+      if(Math.round(1000 / game.renderTime()) > 1){
+        game.renderTime(game.renderTime() * 2);
+      }
+    });
+    parent.children[1].addEventListener("click",function(){
+      if(Math.round(1000 / game.renderTime()) < 360){
+        game.renderTime(game.renderTime() / 2);
+      }
+    });
+    function render(){
+      parent.children[2].innerHTML = Math.round(1000/game.renderTime()) + "フレーム/1秒";
+    }
+  }
+  function clearMenu(){
+    var parent = document.getElementById("clearing");
+    var i = 1;
+    lifegame.addEventListener("clear", function(){
+      render();
+    })
+    parent.children[0].addEventListener("click", function (e) {//clear
+      game.clear();
+    });
+    function render(){
+      parent.children[1].innerHTML = i + "回"
+      i += 1;
+    }
+  }
   function remapMenu(){
     var i = 1;
     var parent = document.getElementById("remapping");
@@ -204,6 +274,29 @@ Lifegame.prototype = {
       return point;
     }
   },
+  reverse: function(val){
+    var _ = this;
+    var tmpArray = _.randomArray(0);
+    for(var i = 0; i < _.cellSize; i++){
+      for(var j = 0; j < _.cellSize; j++){
+        if(val == "vertical"){
+          tmpArray[i][j] = _.array[_.cellSize-1-i][j];
+        }else if(val == "horizon"){
+          tmpArray[i][j] = _.array[i][_.cellSize-1-j];
+        }
+      }
+    }
+    _.array = tmpArray;
+    _.drawmap(_.array);
+  },
+//=====================================
+  clear: function(){
+    var _ = this;
+    _.array = _.randomArray(0);
+    _.drawmap(_.array);
+    _.resetTime()
+    _.stop()
+  },
 //=====================================
   lifeToggle: function(cell){
     return cell ? 0 : 1;
@@ -292,6 +385,16 @@ Lifegame.prototype = {
       _.fireEvent("scale");
     }else{
       return _.scaleSize;
+    }
+  },
+//=====================================
+  renderTime: function(val){
+    var _ = this;
+    if(val !=null){
+      _.frameRenderTime = val;
+      _.fireEvent("renderTime");
+    }else{
+      return _.frameRenderTime;
     }
   },
 //=====================================
@@ -461,25 +564,7 @@ Lifegame.prototype = {
 //     });
 
 // }
-// //================================================
-// function frameRenderTiming(){//描画するフレームの量を変更する
-//   var parent = document.getElementById("frameRenderTiming");
-//   parent.children[0].addEventListener("click",function(){//minus
-//     if(Math.round(1000 / lifegame.frameRenderTime) > 1){
-//       lifegame.frameRenderTime = lifegame.frameRenderTime * 2;
-//       render();
-//     }
-//   });
-//   parent.children[1].addEventListener("click",function(){//minus
-//     if(Math.round(1000 / lifegame.frameRenderTime) < 160){
-//       lifegame.frameRenderTime = lifegame.frameRenderTime / 2;
-//       render();
-//     }
-//   });
-//   function render(){
-//     parent.children[2].innerHTML = Math.round(1000/lifegame.frameRenderTime) + "フレーム/1秒";
-//   }
-// }
+
 
 // //================================================
 // function exporting() {
@@ -523,46 +608,7 @@ Lifegame.prototype = {
 //   }
 //   return newArray;
 // }
-// //================================================
-// function reversing(){//キャンバスのサイズを変更する
-//   var parent = document.getElementById("reversing");
-//   parent.children[0].addEventListener("click", function (e) {
-//     var tmpArray = randomArray(0);
-//     for(var i = 0; i < lifegame.cellSize; i++){
-//       for(var j = 0; j < lifegame.cellSize; j++){
-//         tmpArray[i][j] = lifegame.array[lifegame.cellSize-1-i][j];
-//       }
-//     }
-//     lifegame.array = tmpArray;
-//     drawmap(lifegame.array);
-//   });
-//   parent.children[1].addEventListener("click", function (e) {
-//     var tmpArray = randomArray(0);
-//     for(var i = 0; i < lifegame.cellSize; i++){
-//       for(var j = 0; j < lifegame.cellSize; j++){
-//         tmpArray[i][j] = lifegame.array[i][lifegame.cellSize-1-j];
-//       }
-//     }
-//     lifegame.array = tmpArray;
-//     drawmap(lifegame.array);
-//   });
-// }
-// //================================================
-// function clearing() {//キャンバスのセル情報を空にする
-//     var parent = document.getElementById("clearing");
-//     parent.children[0].addEventListener("click", function (e) {//clear
-//         lifegame.array = randomArray(0);
-//         drawmap(newArray);
-//         resetTime()
-//         stopPlaying()
-//         render();
-//     });
-//     var i = 1;
-//     function render() {
-//         parent.children[1].innerHTML = i + "回"
-//         i += 1;
-//     }
-// }
+
 // //================================================
 
 // //================================================
