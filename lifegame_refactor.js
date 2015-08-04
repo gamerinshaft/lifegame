@@ -1,15 +1,29 @@
-
-
-//================================================
-
-
 window.onload = function(){
   var lifegame = document.getElementById("lifegame");
   var previewCanvas = document.getElementById("previewCanvas");
   game = new Lifegame(lifegame, previewCanvas, 20, "red");
   playMenu();
   scaleMenu();
+  resizeMenu();
+  remapMenu();
+  lifegame.addEventListener("resetTime",function(){
+    document.getElementById("playing").children[1].innerHTML = "0秒";
+  });
+  function remapMenu(){
+    var i = 1;
+    var parent = document.getElementById("remapping");
+    lifegame.addEventListener("remap", function(){
+      render();
+    });
+    parent.children[0].addEventListener("click",function(e){//remap
+      game.remap();
+    });
+    function render(){
+      parent.children[1].innerHTML = i + "回"
+      i += 1;
+    }
 
+  }
   function playMenu(){
     lifegame.addEventListener("start",function(){
       parent.children[0].classList.remove("fa-youtube-play");
@@ -37,6 +51,22 @@ window.onload = function(){
         }, 100)
       }
     });
+  }
+
+  function resizeMenu(){
+    var parent = document.getElementById("resizing");
+    lifegame.addEventListener("resize",function(){
+      render();
+    });
+    parent.children[0].addEventListener("click", function(){
+      game.resize(0);
+    });
+    parent.children[1].addEventListener("click", function(){
+      game.resize(1);
+    });
+    function render(){
+      parent.children[2].innerHTML = game.cellSize + "個";
+    }
   }
 
   function scaleMenu(){//キャンバスのサイズを変更する
@@ -199,9 +229,60 @@ Lifegame.prototype = {
     _.fireEvent("stop");
   },
 //=====================================
-  remapping: function(){},
+  remap: function(){
+    var _ = this;
+    _.array = _.randomArray();
+    _.drawmap(_.array);
+    _.resetTime()
+    _.stop();
+    _.fireEvent("remap");
+  },
 //=====================================
-  resizing: function(){},
+  resize: function(val){
+    var _ = this;
+    if(val){
+      _.cellSize += 1;
+      _.cellWidth = _.cvs.width / _.cellSize;
+      var tmpArray = _.randomArray(0);
+      for(var i = 0; i < _.cellSize; i++){
+        for(var j = 0; j < _.cellSize; j++){
+          if(_.cellSize%2 == 0){
+            if(_.cellSize - 1 == i || _.cellSize - 1 == j){
+              tmpArray[i][j] = 0;
+            }else{
+              tmpArray[i][j] = _.array[i][j];
+            }
+          }else{
+            if(i==0 || j==0){
+              tmpArray[i][j] = 0;
+            }else{
+              tmpArray[i][j] = _.array[i-1][j-1];
+            }
+          }
+        }
+      }
+      _.array = tmpArray;
+      _.drawmap(_.array)
+    }else{
+      if(_.cellSize != 1){
+        _.cellSize -= 1;
+        _.cellWidth = _.cvs.width / _.cellSize;
+        var tmpArray = _.randomArray(0);
+        for(var i = 0; i < _.cellSize; i++){
+          for(var j = 0; j < _.cellSize; j++){
+            if(_.cellSize%2 == 0){
+              tmpArray[i][j] = _.array[i][j];
+            }else{
+              tmpArray[i][j] = _.array[i+1][j+1];
+            }
+          }
+        }
+        _.array = tmpArray;
+        _.drawmap(_.array);
+      }
+    }
+    _.fireEvent("resize");
+  },
 //=====================================
   scale: function(val){
     var _ = this;
@@ -359,21 +440,17 @@ Lifegame.prototype = {
     var customEvent = document.createEvent("HTMLEvents");
     customEvent.initEvent(eventName, true, false);
     _.cvs.dispatchEvent(customEvent);
+  },
+  resetTime: function(){
+    var _ = this;
+    lifegame.throughTime = 0;
+    _.fireEvent("resetTime");
   }
 }
 
-//==========　独自イベント
-// var customEvent = document.createEvent("HTMLEvents");
-//  customEvent.initEvent("custom_event", true, false);
-//  //fire!!
-//  this.dispatchEvent(customEvent);
-
 
 // //================================================
-// function resetTime(){//経過時間をリセットするrisettosuru
-//   lifegame.throughTime = 0;
-//   document.getElementById("playing").children[1].innerHTML = "0秒";
-// }
+
 // //================================================
 // function coloring(){//セルの色を変更する
 //     var parent = document.getElementById("coloring");
@@ -432,57 +509,6 @@ Lifegame.prototype = {
 //   return array;
 // }
 // //================================================
-// function resizing(){//セルの量を変更する
-//   var parent = document.getElementById("resizing");
-//   parent.children[0].addEventListener("click",function(){//minus
-//     if(lifegame.cellSize != 1){
-//       lifegame.cellSize = lifegame.cellSize - 1;
-//       lifegame.cellWidth = lifegame.frameWidth / lifegame.cellSize;
-//       var tmpArray = randomArray(0);
-//       for(var i = 0; i < lifegame.cellSize; i++){
-//         for(var j = 0; j < lifegame.cellSize; j++){
-//           if(lifegame.cellSize%2 == 0){
-//             tmpArray[i][j] = lifegame.array[i][j];
-//           }else{
-//             tmpArray[i][j] = lifegame.array[i+1][j+1];
-//           }
-//         }
-//       }
-//       lifegame.array = tmpArray;
-//       drawmap(lifegame.array);
-//       render();
-//     }
-//   });
-//   parent.children[1].addEventListener("click", function () {//plus
-//     lifegame.cellSize = lifegame.cellSize + 1;
-//     lifegame.cellWidth = lifegame.frameWidth / lifegame.cellSize;
-//     var tmpArray = randomArray(0);
-//     for(var i = 0; i < lifegame.cellSize; i++){
-//       for(var j = 0; j < lifegame.cellSize; j++){
-//         if(lifegame.cellSize%2 == 0){
-//           if(lifegame.cellSize - 1 == i || lifegame.cellSize - 1 == j){
-//             tmpArray[i][j] = 0;
-//           }else{
-//             tmpArray[i][j] = lifegame.array[i][j];
-//           }
-//         }else{
-//           if(i==0 || j==0){
-//             tmpArray[i][j] = 0;
-//           }else{
-//             tmpArray[i][j] = lifegame.array[i-1][j-1];
-//           }
-//         }
-//       }
-//     }
-//     lifegame.array = tmpArray;
-//     drawmap(lifegame.array)
-//     render();
-//   });
-//   function render(){
-//     parent.children[2].innerHTML = lifegame.cellSize + "個";
-//   }
-// }
-// //================================================
 // function randomArray(val) { //セルの配列をランダムに生成する、0を与えた場合全てのセルが死んだ状態になる
 //   newArray = new Array();
 //   for (var i = 0; i < lifegame.cellSize; i++) {
@@ -520,22 +546,6 @@ Lifegame.prototype = {
 //     lifegame.array = tmpArray;
 //     drawmap(lifegame.array);
 //   });
-// }
-// //================================================
-// function remapping(){//セルをランダム生成、描画する
-//   var parent = document.getElementById("remapping");
-//   parent.children[0].addEventListener("click",function(e){//remap
-//     lifegame.array = randomArray();
-//     drawmap(lifegame.array);
-//     resetTime()
-//     stopPlaying()
-//     render();
-//   });
-//   var i = 1;
-//   function render(){
-//     parent.children[1].innerHTML = i + "回"
-//     i += 1;
-//   }
 // }
 // //================================================
 // function clearing() {//キャンバスのセル情報を空にする
